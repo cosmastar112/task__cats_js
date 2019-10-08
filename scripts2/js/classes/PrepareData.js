@@ -1,26 +1,25 @@
 class PrepareData 
 {
-	constructor(filmsData, speciesData, peoplesData, specieName) {
+	constructor(filmsData, speciesData, peopleData, specieName) {
 		this.filmsData = filmsData;
 		this.speciesData = speciesData;
-		this.peoplesData = peoplesData;
+		this.peopleData = peopleData;
 		this.specieName = specieName;
 		
 		const IS_DEV = true;
 		if (IS_DEV) {
 			this.filmsData = _films;
 			this.speciesData = _species;
-			this.peoplesData = _people;
+			this.peopleData = _people;
 			this.specieName = "Cat";
 		}
 	}
 
 	get() {
 
-		const result = this.getFimsWithPeoplesNames(
-			this.filmsData, this.speciesData, this.peoplesData, this.specieName);
+		const result = this.getFimsWithPeopleNames(
+			this.filmsData, this.speciesData, this.peopleData, this.specieName);
 		return result;
-		
 	}
 
 	/**
@@ -28,18 +27,12 @@ class PrepareData
 	* Список имён содержит имена представителей вида, которые играли в фильме.
 	*
 	* На вход: 
-	*	- данные по фильмам
-	* 	@param filmsData = [ {}, {} ... ]
-	*	- данные по видам
-	* 	@param speciesData = [ {}, {} ... ]
-	*	- данные по представителям видов
-	* 	@param peoplesData = [ {}, {} ... ]
-	*	- имя вида, по которому нужно произвести поиск
-	* 	@param specieName = string
-	*
+	* 	@param filmsData = [ {}, {} ... ] - данные по фильмам
+	* 	@param speciesData = [ {}, {} ... ] - данные по видам
+	* 	@param peopleData = [ {}, {} ... ] - данные по представителям видов
+	* 	@param specieName = string - имя вида, по которому нужно произвести поиск
 	* На выход:
-	*	- список объектов, где каждый объект - имя фильма + список имен представителей вида
-	*	@return [ {}, {}, ... ]
+	*	@return [ {}, {}, ... ] - список объектов, где каждый объект - название фильма + список имен представителей вида
 	*
 	* Пример выходной информации: 
 	*	[
@@ -48,7 +41,7 @@ class PrepareData
 	*	  ...
 	*	]
 	*/
-	getFimsWithPeoplesNames(filmsData, speciesData, peoplesData, specieName) {
+	getFimsWithPeopleNames(filmsData, speciesData, peopleData, specieName) {
 		// return 1;
 		// console.log(filmData);
 		const self = this;
@@ -58,7 +51,6 @@ class PrepareData
 			return self.getPeopleNamesInFilm(filmData, specieName);
 		});
 		return list;
-
 	}
 
 	/**
@@ -66,60 +58,63 @@ class PrepareData
 	* Список содержит имена представителей вида, которые играли в фильме.
 	*
 	* На вход: 
-	*	- данные по фильму
-	* 	@param filmData = []
-	*	- название вида
-	* 	@param specieName = string
-	*
+	* 	@param filmData = [] - данные по фильму
+	* 	@param specieName = string - название вида
 	* На выход:
-	*	- объект, где каждый объект - имя фильма + список имён представителей вида
-	*	@return {}
+	*	@return {} - объект, где каждый объект - имя фильма + список имён представителей вида
 	*
 	* Пример выходной информации: 
-	* @return { Имя фильма, [ Список имён представителей вида ] }
+	* @return { Название фильма, [ Список имён представителей вида ] }
 	*/
 	getPeopleNamesInFilm(filmData, specieName) {
-		const self = this;
-
+		// указанный вид играл в фильме?
 		const isPlay = this.isSpeciePlayInFilm(filmData, specieName)
-
 		if (isPlay) {
 			const urlFilm = this.getFilmUrl(filmData);
-			const peoplesOfSpecie = this.getPeoplesOfSpecie(specieName);
+			// кто из представителей указанного вида снимался в фильме?
+			const peoplesUrlsBySpecie = this.getPeoplesUrls(specieName);
+			// URL представителей вида
+			const peoplesUrlsInFilm = this.getPeoplesUrlsInFilm(urlFilm, peoplesUrlsBySpecie);
+			// имена представителей вида
+			const names = this.getPeopleNames(peoplesUrlsInFilm);
 
-			const peopleUrls = peoplesOfSpecie.filter(function(peopleUrl) {
-				const peopleData = self.getPeopleData(peopleUrl);
-				const filmsWithPeople = self.getPeopleFilms(peopleData)
-
-				return (filmsWithPeople.includes(urlFilm));
-
-			});
-
-			const names = this.getPeopleNames(peopleUrls);
-
-			return this.setListPeopleNamesInFilm(filmData, names);
-
+			return this.setNamesList(filmData, names);
 		}
 
-		return this.setListPeopleNamesInFilm(filmData, []);
+		return this.setNamesList(filmData, []);
+	}
 
+	/**
+	* Получить список URL представителей вида для фильма.
+	*
+	* На вход: 
+	* 	@param urlFilm = [] - URL фильма
+	* 	@param peoplesUrlsBySpecie = [] - список URL представителей вида 
+	* На выход:
+	*	@return [] - список URL представителей вида, которые снимались в фильме
+	*/
+	getPeoplesUrlsInFilm(urlFilm, peoplesUrlsBySpecie) {
+		const self = this;
+		const peoplesUrls = peoplesUrlsBySpecie.filter(function(peopleUrl) {
+			const peopleData = self.getPeopleData(peopleUrl);
+			const filmsWithPeople = self.getPeopleFilms(peopleData);
+
+			return (filmsWithPeople.includes(urlFilm));
+
+		});
+		return peoplesUrls;
 	}
 
 	/**
 	* Проверить снимались ли в фильме представители вида.
 	*
 	* На вход: 
-	*	- данные по фильму
-	* 	@param filmData = []
-	*	- название вида
-	* 	@param specieName = string
-	*
+	* 	@param filmData = [] - данные по фильму
+	* 	@param specieName = string - название вида
 	* На выход:
-	*	- true если снимались, иначе false
-	*	@return boolean
+	*	@return boolean - true если снимались, иначе false
 	*/
 	isSpeciePlayInFilm(filmData, specieName) {
-
 		const filmUrl = this.getFilmUrl(filmData);
 		const metaObjectSpecie = this.getSpecieMetaObject(specieName)
 		const metaObjectFilms = this.getMetaObjectFilms(metaObjectSpecie);
@@ -136,12 +131,9 @@ class PrepareData
 	* Получить объект метаинформации вида.
 	*
 	* На вход: 
-	*	- название вида
-	* 	@param specieName = string
-	*
+	* 	@param specieName = string - название вида
 	* На выход:
-	*	- метаобъект вида (из API species)
-	*	@return {}
+	*	@return {} - метаобъект вида (из API species)
 	*/
 	getSpecieMetaObject(specieName) {
 		// console.log(this.speciesData);
@@ -155,12 +147,9 @@ class PrepareData
 	* Получить Url метаобъекта вида.
 	*
 	* На вход: 
-	*	- метаобъект вида (из API species)
-	* 	@param metaObjectSpecie = {}
-	*
+	* 	@param metaObjectSpecie = {} - метаобъект вида (из API species)
 	* На выход:
-	*	- Url метаобъекта вида
-	*	@return string
+	*	@return string - Url метаобъекта вида
 	*
 	*/
 	getMetaObjectUrl(metaObjectSpecie) {
@@ -172,12 +161,9 @@ class PrepareData
 	* Получить список видов, которые играли в фильме.
 	*
 	* На вход: 
-	*	- данные по фильму
-	* 	@param filmData = {}
-	*
+	* 	@param filmData = {} - данные по фильму
 	* На выход:
-	*	- список видов
-	*	@return [ string, string ... ]
+	*	@return [ string, string ... ] - список видов
 	*
 	* Пример выходной информации: 
 	*	[
@@ -189,19 +175,15 @@ class PrepareData
 	getSpeciesInFilm(filmData) {
 		// console.log(filmData);
 		return filmData["species"];
-		// вернуть свойство "species" объекта filmData
 	}
 
 	/**
 	* Получить url фильма.
 	*
 	* На вход: 
-	*	- данные по фильму
-	* 	@param filmData = []
-	*
+	* 	@param filmData = [] - данные по фильму
 	* На выход:
-	*	- url фильма
-	*	@return string 
+	*	@return string - url фильма
 	*/
 	getFilmUrl(filmData) {
 		return filmData["url"]; 
@@ -211,12 +193,9 @@ class PrepareData
 	* Получить список фильмов, в которых играли представители вида
 	*
 	* На вход: 
-	*	- объект представителей вида
-	* 	@param metaObjectSpecie = {}
-	*
+	* 	@param metaObjectSpecie = {} - объект представителей вида
 	* На выход:
-	*	- список Url фильмов
-	*	@return [ string, string ... ]
+	*	@return [ string, string ... ] - список Url фильмов
 	*
 	* Пример выходной информации: 
 	*	[
@@ -233,12 +212,9 @@ class PrepareData
 	* Получить список url представителей вида, которые участвовали в фильмах (не важно в каких).
 	*
 	* На вход: 
-	*	- название вида
-	* 	@param specieName = string
-	*
+	* 	@param specieName = string - название вида
 	* На выход:
-	*	- список url
-	*	@return [ string, string, ... ]
+	*	@return [ string, string, ... ] - список url
 	*
 	* Пример выходной информации: 
 	*	[
@@ -246,9 +222,8 @@ class PrepareData
 	*		"URL2 представителя вида",
 	*		...
 	*	]
-	* @return { Имя фильма, [ Список имён представителей вида ] }
 	*/
-	getPeoplesOfSpecie(specieName) {
+	getPeoplesUrls(specieName) {
 		const specieMetaObject = this.getSpecieMetaObject(specieName);
 		return specieMetaObject["people"];
 	}
@@ -257,15 +232,12 @@ class PrepareData
 	* Получить данные представителя вида.
 	*
 	* На вход: 
-	*	- url представителя вида
-	* 	@param peopleUrl = string
-	*
+	* 	@param peopleUrl = string - url представителя вида
 	* На выход:
-	*	- объект с данными из API people
-	*	@return {}
+	*	@return {} - объект с данными из API people
 	*/
 	getPeopleData(peopleUrl) {
-		const result = this.peoplesData.filter(function(people) {
+		const result = this.peopleData.filter(function(people) {
 			return (people["url"] === peopleUrl);
 		});
 		return result.pop();
@@ -275,12 +247,9 @@ class PrepareData
 	* Получить фильмы, в которых снимался представитель вида.
 	*
 	* На вход: 
-	*	- объект представителя вида
-	* 	@param peopleData = {}
-	*
+	* 	@param peopleData = {} - объект представителя вида
 	* На выход:
-	*	- список URL фильмов
-	*	@return [ string, string, ... ]
+	*	@return [ string, string, ... ] - список URL фильмов
 	*/
 	getPeopleFilms(peopleData) {
 		return peopleData["films"];
@@ -290,28 +259,21 @@ class PrepareData
 	* Получить имя представителя вида.
 	*
 	* На вход: 
-	*	- объект представителя вида
-	* 	@param peopleData = {}
-	*
+	* 	@param peopleData = {} - объект представителя вида
 	* На выход:
-	*	- имя представителя вида
-	*	@return string
+	*	@return string - имя представителя вида
 	*/
 	getPeopleName(peopleData) {
 		return peopleData["name"];
-		// вернуть свойство "name" объекта peopleData
 	}
 
 	/**
 	* Получить название фильма.
 	*
 	* На вход: 
-	*	- данные по фильму
-	* 	@param filmData = []
-	*
+	* 	@param filmData = [] - данные по фильму
 	* На выход:
-	*	- название фильма
-	*	@return string 
+	*	@return string - название фильма
 	*/
 	getFilmTitle(filmData) {
 		return filmData["title"];
@@ -321,12 +283,9 @@ class PrepareData
 	* Получить имена представителей вида.
 	*
 	* На вход: 
-	*	- список Url представителей вида
-	* 	@param peopleUrls = []
-	*
+	* 	@param peopleUrls = [] - список Url представителей вида
 	* На выход:
-	*	- список имён представителей вида
-	*	@return []
+	*	@return [] - список имён представителей вида
 	*/
 	getPeopleNames(peopleUrls) {
 		const self = this;
@@ -345,15 +304,12 @@ class PrepareData
 	* Поле peopleNames объекта - список имёна представителей вида, которые играли в фильме
 	*
 	* На вход: 
-	*	- данные о фильме
-	* 	@param filmData = {}
-	*	- список имён представителей вида
-	* 	@param names = []
-	*
+	* 	@param filmData = {} - данные о фильме
+	* 	@param names = [] - список имён представителей вида
 	* На выход:
 	*	@return {}
 	*/
-	setListPeopleNamesInFilm(filmData, names) {
+	setNamesList(filmData, names) {
 		const list = 
 		{ 
 			film: this.getFilmTitle(filmData),
