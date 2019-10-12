@@ -1,11 +1,13 @@
-class PrepareData 
+"use strict";
+
+export default class PrepareData 
 {
 	constructor(filmsData, speciesData, peopleData, specieName) {
 		this.filmsData = filmsData;
 		this.speciesData = speciesData;
 		this.peopleData = peopleData;
 		this.specieName = specieName;
-		
+
 		const IS_DEV = true;
 		if (IS_DEV) {
 			this.filmsData = _films;
@@ -47,9 +49,13 @@ class PrepareData
 		const self = this;
 
 		// список объектов
+		// const list = filmsData.map(function(filmData) {
 		const list = filmsData.map(function(filmData) {
-			return self.getPeopleNamesInFilm(filmData, specieName);
+			const names = self.getPeopleNamesInFilm(filmData, specieName);
+			const filmWithNames = self.setNamesList(filmData, names);
+			return filmWithNames;
 		});
+
 		return list;
 	}
 
@@ -61,12 +67,13 @@ class PrepareData
 	* 	@param filmData = [] - данные по фильму
 	* 	@param specieName = string - название вида
 	* На выход:
-	*	@return {} - объект, где каждый объект - имя фильма + список имён представителей вида
+	*	@return [] - список имён представителей вида
 	*
 	* Пример выходной информации: 
-	* @return { Название фильма, [ Список имён представителей вида ] }
+	* @return [ Список имён представителей вида ]
 	*/
 	getPeopleNamesInFilm(filmData, specieName) {
+		let names = [];
 		// указанный вид играл в фильме?
 		const isPlay = this.isSpeciePlayInFilm(filmData, specieName)
 		if (isPlay) {
@@ -74,14 +81,12 @@ class PrepareData
 			// кто из представителей указанного вида снимался в фильме?
 			const peoplesUrlsBySpecie = this.getPeoplesUrls(specieName);
 			// URL представителей вида
-			const peoplesUrlsInFilm = this.getPeoplesUrlsInFilm(urlFilm, peoplesUrlsBySpecie);
+			const peopleUrlsInFilm = this.getPeopleUrlsInFilm(urlFilm, peoplesUrlsBySpecie);
 			// имена представителей вида
-			const names = this.getPeopleNames(peoplesUrlsInFilm);
-
-			return this.setNamesList(filmData, names);
+			names = this.getPeopleNames(peopleUrlsInFilm);
 		}
 
-		return this.setNamesList(filmData, []);
+		return names;
 	}
 
 	/**
@@ -93,13 +98,14 @@ class PrepareData
 	* На выход:
 	*	@return [] - список URL представителей вида, которые снимались в фильме
 	*/
-	getPeoplesUrlsInFilm(urlFilm, peoplesUrlsBySpecie) {
+	getPeopleUrlsInFilm(urlFilm, peoplesUrlsBySpecie) {
 		const self = this;
 		const peoplesUrls = peoplesUrlsBySpecie.filter(function(peopleUrl) {
 			const peopleData = self.getPeopleData(peopleUrl);
 			const filmsWithPeople = self.getPeopleFilms(peopleData);
 
-			return (filmsWithPeople.includes(urlFilm));
+			// return (filmsWithPeople.includes(urlFilm));
+			return (filmsWithPeople.indexOf(urlFilm) !== -1);
 
 		});
 		return peoplesUrls;
@@ -120,7 +126,8 @@ class PrepareData
 		const metaObjectFilms = this.getMetaObjectFilms(metaObjectSpecie);
 		// console.log(metaObjectFilms);
 
-		if ( metaObjectFilms.includes(filmUrl) ) {
+		// if ( metaObjectFilms.includes(filmUrl) ) {
+		if ( metaObjectFilms.indexOf(filmUrl) !== -1 ) {
 			return true
 		}
 
@@ -297,11 +304,9 @@ class PrepareData
 	}
 
 	/**
-	* Создать объект, являющийся результатом работы функции getPeopleNamesInFilm()
-	* Связь вида: { Имя фильма, [ Список имён представителей вида, которые играли в фильме ] }
-
-	* Поле film объекта - название фильма
-	* Поле peopleNames объекта - список имёна представителей вида, которые играли в фильме
+	* Создать объект-связь вида: { Имя фильма, [ Список имён представителей вида, которые играли в фильме ] }
+	* Свойство film объекта - название фильма
+	* Свойство peopleNames объекта - список имёна представителей вида, которые играли в фильме
 	*
 	* На вход: 
 	* 	@param filmData = {} - данные о фильме
@@ -319,4 +324,3 @@ class PrepareData
 	}
 
 }
-
