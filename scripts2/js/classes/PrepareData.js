@@ -8,7 +8,7 @@ export default class PrepareData
 		this.peopleData = peopleData;
 		this.specieName = specieName;
 
-		const IS_DEV = true;
+		const IS_DEV = false;
 		if (IS_DEV) {
 			this.filmsData = _films;
 			this.speciesData = _species;
