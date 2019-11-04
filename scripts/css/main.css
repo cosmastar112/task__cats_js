@@ -1,0 +1,7 @@
+.preloader__visible_true {
+	display: visible;
+}
+
+.preloader__visible_false {
+	display: none;
+}

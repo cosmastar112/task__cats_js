@@ -1,0 +1,22 @@
+.cats__table {
+	border: 1px solid;
+	border-collapse: collapse;
+	/*display: none;*/
+}
+
+.cats__table_visible {
+	display: visible;	
+}
+
+.cats__table th, tr, td {
+	border: 1px solid;
+	padding: 8px;
+}
+
+.cats__table th {
+	font-size: 1.5em;
+}
+
+.cats__table td p {
+	margin: 2px;
+}
