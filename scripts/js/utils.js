@@ -1,70 +1,72 @@
 // const urls = [
 // 	"https://ghibliapi.herokuapp.com/films/",
-// 	"https://ghibliapi.herokuapp.com/species",
-// 	"https://ghibliapi.herokuapp.com/people"
+// 	"https://ghibliapi.herokuapp.com/species/",
+// 	"https://ghibliapi.herokuapp.com/people/"
 // ];
 
-// Обработка и показ полученных данных
-// function showData(data) {
-// 	console.log('showData');
-// 	console.log(data);
-// 	return;
-// 	// передаю данные для обработки
-// 	const filmsData = data[0]; 
-// 	const speciesData = data[1]; 
-// 	const peopleData = data[2]; 
-// 	const specieName = "Cat";
+// const urls = [
+// 	"http://yii2/basic/web/index.php?r=cats/films",
+// 	"http://yii2/basic/web/index.php?r=cats/species",
+// 	"http://yii2/basic/web/index.php?r=cats/people"
+// ];
 
-// 	const prepareData = new PrepareData(filmsData, speciesData, peopleData, specieName);
-// 	console.log(prepareData.get());
-// }	
+// // Обработка данных после загрузки
+// load(urls)
+// 	.then(data => { 
+// 		console.log("Fetch finished");
+// 		console.log(data);
+// 	})
+// 	.catch(error => {
+// 		console.log('Error while loading data:' + error);
+// 		showError();
+// 	});
 
-// Индикация ошибки в работе приложения
+// /**
+// * Загрузка (последовательная) данных.
+// * @params {Array [String, String, String]} - массив из трёх ссылок.
+// * @return {Promise}
+// */
+// function load(urls) {
+// 	let _data = [];
+// 	return new Promise(function(resolve, reject) {
+// 		loadJson(urls[0])
+// 			.then(response1 => { 
+// 				console.log(response1);
+// 		 		// порция данных сохраняется в контейнере
+// 				_data.push(response1);
+// 				return loadJson(urls[1]);
+// 			})
+// 			.then((response2) => { 
+// 				console.log(response2);
+// 		 		// порция данных сохраняется в контейнере
+// 				_data.push(response2);
+// 				return loadJson(urls[2]); 
+// 			})
+// 			.then((response3) => { 
+// 				console.log(response3);
+// 		 		// порция данных сохраняется в контейнере
+// 				_data.push(response3);
+// 				resolve(_data);
+// 			})
+// 			.catch(error => { 
+// 				reject(error);  
+// 			});
+// 	})
+// }
+
+// /** 
+// * Загрузка одной порции данных
+// * @param {String} url
+// */
+// function loadJson(url) {
+// 	return fetch(url)
+// 	 .then(response => response.json());
+// }
+
+// /** 
+// * Обработка ошибок работы приложения
+// */
 // function showError() {
 // 	const elem = document.getElementsByClassName('preloader');
-// 	elem.item(0).innerHTML = "<p>Ошибка при загрузке данных :( Проверьте подключение к сети.</p>";
-
-// 	// с использованием jQuery
-// 	// $(".preloader").html("Ошибка при загрузке данных :( Проверьте подключение к сети.");
+// 	elem.item(0).innerHTML = "<p>Произошла ошибка при загрузке данных. Данные не будут отображены.</p>";
 // }
-
-// let _data = [];
-
-// Полная запись загрузки данных
-// let promise = fetch("http://yii2/basic/web/index.php?r=cats/films");
-// 	promise
-// 		.then(response => response.json())
-// 		.then(data => { console.log(data); _data.push(data); }) 
-// 		.then(data => fetch("http://yii2/basic/web/index.php?r=cats/species"))
-// 		.then(response => response.json())
-// 		.then(data => { console.log(data); _data.push(data); }) 
-// 		.then(data => fetch("http://yii2/basic/web/index.php?r=cats/people"))
-// 		.then(response => response.json())
-// 		.then(data => { console.log(data); _data.push(data); }) 
-// 		// Ошибка загрузки информации
-// 		.catch(error => { console.log(error); showError(); })
-// 		// Показать таблицу
-// 		.then(d => { console.log('End chain'); console.log(_data); showData(_data); })
-// 		// Ошибка обработки информации
-// 		.catch(error => { console.log(error); });
-
-
-// Загрузка одной порции данных
-// function loadJson(url) {
-//   return fetch(url)
-//     .then(response => response.json())
-//     .then(data => _data.push(data));
-// }
-
-// Сокращенная запись загрузки данных
-// loadJson("http://yii2/basic/web/index.php?r=cats/films")
-//  .then(() => loadJson("http://yii2/basic/web/index.php?r=cats/species"))
-//  .then(() => loadJson("http://yii2/basic/web/index.php?r=cats/people"))
-//  // Ошибка загрузки информации
-//  .catch(error => { console.log(error); })
-//  // Обработка и показ данных 
-//  .then(d => { 
-//  	console.log('End chain'); showData(_data); 
-//  })
-//  // Ошибка обработки информации
-//  .catch(error => { console.log(error); });
